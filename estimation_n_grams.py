@@ -21,12 +21,13 @@ class MaxLikelihood(object):
         probability = self.cache.get(ngram, None)
         if probability:
             return probability
-        return self.compute_probability(ngram)
+        probability = self.compute_probability(ngram)
+        self.cache[ngram] = probability
+        return probability
 
     def compute_probability(self, ngram):
         count_n_gram = self.get_n_gram_count(ngram)
         count_n_minus_gram = self.get_n_minus_gram_count(ngram)
-
         if self.n == 1:
             return count_n_gram / self.n_grams.get_word_occurences()
         elif count_n_minus_gram == 0:
@@ -41,7 +42,7 @@ class MaxLikelihood(object):
         count_n_minus_grams = 0
         if self.n > 1:
             n_minus_gram = self.get_minus_n_gram(ngram)
-            count_n_minus_grams = self.get_n_gram_count(n_minus_gram)
+            count_n_minus_grams = self.n_minus_1_grams.get_n_gram_count(n_minus_gram)
         return count_n_minus_grams
 
     @staticmethod

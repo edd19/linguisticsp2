@@ -9,6 +9,7 @@ class TestNGram(unittest.TestCase):
         self.corpus1 = "<s> HELLO MY DEAR FRIEND </s>"
         self.corpus2 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY FRIEND </s>"
         self.corpus3 = "<s> THIS THIS IS MY MY VICTORY THIS NIGHT </s>"
+        self.corpus4 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY DEAR FRIEND MY MY </s>"
 
     def test_estimate_unigram(self):
         max_likelihood = estimation_n_grams.MaxLikelihood(1)
@@ -31,6 +32,29 @@ class TestNGram(unittest.TestCase):
         one_gram = "THIS"
         probability = max_likelihood.estimate_n_gram(one_gram)
         expected_probability = 3/10
+        self.assertEqual(probability, expected_probability, "Don't return good probability")
+
+    def test_estimate_bigram(self):
+        max_likelihood = estimation_n_grams.MaxLikelihood(n=2)
+
+        max_likelihood.add_training_corpus(self.corpus1)
+
+        bi_gram = "HELLO MY"
+        probability = max_likelihood.estimate_n_gram(bi_gram)
+        expected_probability = 1/1
+        self.assertEqual(probability, expected_probability, "Don't return good probability")
+
+        bi_gram = "HELLO YOU"
+        probability = max_likelihood.estimate_n_gram(bi_gram)
+        expected_probability = 0
+        self.assertEqual(probability, expected_probability, "Don't return good probability")
+
+        max_likelihood.flush()
+        max_likelihood.add_training_corpus(self.corpus4)
+
+        bi_gram = "MY DEAR"
+        probability = max_likelihood.estimate_n_gram(bi_gram)
+        expected_probability = 2 / 4
         self.assertEqual(probability, expected_probability, "Don't return good probability")
 
     def test_get_minus_n_gram(self):
