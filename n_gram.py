@@ -19,12 +19,16 @@ class NGram(object):
     def get_counts(self):
         return self.counts
 
+    def get_size(self):
+        return len(self.counts)
+
+    def get_top_n_by_counts(self, n):
+        n_gram_with_counts = list(self.counts.items())
+        n_gram_with_counts.sort(key=lambda x: x[1], reverse=True)
+        return n_gram_with_counts[0:n]
+
     def flush(self):
         self.counts = {}
-
-    def get_next_word(self, corpus):
-        for sentence in self.split_corpus_sentences(corpus):
-            pass
 
     @staticmethod
     def split_corpus_sentences(corpus):

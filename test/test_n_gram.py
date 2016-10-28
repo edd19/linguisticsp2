@@ -8,6 +8,7 @@ class TestNGram(unittest.TestCase):
     def setUp(self):
         self.corpus1 = "<s> HELLO MY DEAR FRIEND </s>"
         self.corpus2 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY FRIEND </s>"
+        self.corpus3 = "<s> THIS THIS IS MY MY VICTORY THIS NIGHT </s>"
 
     def test_unigram(self):
         unigram = n_gram.Unigram()
@@ -73,3 +74,14 @@ class TestNGram(unittest.TestCase):
         actual = list(ngram.split_sentence_n_grams(self.corpus1, 2))
 
         self.assertEqual(expected, actual, "Split sentence should return list of two words")
+
+    def test_get_top_n_by_counts(self):
+        unigram = n_gram.Unigram()
+        unigram.add_corpus(self.corpus3)
+
+        actual_top_2= unigram.get_top_n_by_counts(2)
+        expected_top_2 = [("THIS", 3), ("MY", 2)]
+
+        self.assertListEqual(expected_top_2, actual_top_2, "Incorrect top 2 elements by counts")
+
+
