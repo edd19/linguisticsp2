@@ -56,11 +56,14 @@ class NGram(object):
 
     def discard_unfrequent_n_grams(self, min_counts):
         n_gram_with_counts = list(self.counts.items())
-        self.counts["<UNK>"] = 0
+        self.counts["<UNK>"] = 0  # Replace discarded elements by the unknown tag
+        discarded_n_grams = []
         for (n_gram, count) in n_gram_with_counts:
             if count <= min_counts:
                 self.counts["<UNK>"] += count
                 del self.counts[n_gram]
+                discarded_n_grams.append(n_gram)
+        return discarded_n_grams
 
 
 class Unigram(NGram):
