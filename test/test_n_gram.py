@@ -84,6 +84,23 @@ class TestNGram(unittest.TestCase):
 
         self.assertListEqual(expected_top_2, actual_top_2, "Incorrect top 2 elements by counts")
 
+    def test_get_word_occurences(self):
+        unigram = n_gram.Unigram()
+        unigram.add_corpus(self.corpus1)
+
+        expected = 6
+        actual = unigram.get_word_occurences()
+        self.assertEqual(expected, actual, "Should return 6 word occurences")
+
+        trigram = n_gram.Trigram()
+        trigram.add_corpus(self.corpus2)
+        trigram.flush()
+        trigram.add_corpus(self.corpus2)
+
+        expected = 13
+        actual = trigram.get_word_occurences()
+        self.assertEqual(expected, actual, "Should return 13 word occurences")
+
     def test_discard_unfrequent_n_grams(self):
         unigram = n_gram.Unigram()
         unigram.add_corpus(self.corpus3)

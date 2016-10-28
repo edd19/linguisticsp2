@@ -5,6 +5,7 @@ class NGram(object):
     def __init__(self, n=1):
         self.counts = {}
         self.n = n
+        self.word_occurences = 0
 
     def add_corpus(self, corpus):
         for n_gram in self.get_n_grams(corpus):
@@ -22,6 +23,13 @@ class NGram(object):
     def get_size(self):
         return len(self.counts)
 
+    def get_n_gram_count(self, n_gram):
+        frequency = self.counts.get(n_gram, None)
+        if frequency:
+            return frequency
+        frequency = self.counts.get("<UNK>", 0)
+        return frequency
+
     def get_top_n_by_counts(self, n):
         n_gram_with_counts = list(self.counts.items())
         n_gram_with_counts.sort(key=lambda x: x[1], reverse=True)
@@ -29,6 +37,7 @@ class NGram(object):
 
     def flush(self):
         self.counts = {}
+        self.word_occurences = 0
 
     @staticmethod
     def split_corpus_sentences(corpus):
@@ -39,9 +48,9 @@ class NGram(object):
             sentence += separator
             yield sentence.strip()
 
-    @staticmethod
-    def split_sentence_n_grams(sentence, n):
+    def split_sentence_n_grams(self, sentence, n):
         words = sentence.split()
+        self.word_occurences += len(words)
         n_gram = []
         for word in words:
             n_gram.append(word)
@@ -65,6 +74,8 @@ class NGram(object):
                 discarded_n_grams.append(n_gram)
         return discarded_n_grams
 
+    def get_word_occurences(self):
+        return self.word_occurences
 
 class Unigram(NGram):
     def __init__(self):
