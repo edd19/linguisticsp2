@@ -60,3 +60,9 @@ class Bigram(NGram):
     def __init__(self):
         super(self.__class__, self).__init__(n=2)
 
+
+class Trigram(NGram):
+    def __init__(self):
+        super(self.__class__, self).__init__(n=3)
+
+

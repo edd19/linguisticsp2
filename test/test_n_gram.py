@@ -34,6 +34,20 @@ class TestNGram(unittest.TestCase):
         actual = bigram.get_counts()
         self.assertEqual(expected, actual)
 
+        bigram.flush()
+        bigram.add_corpus(self.corpus2)
+        expected = {"<s> HELLO": 1, "HELLO MY": 1, "MY DEAR": 1, "DEAR FRIEND": 1, "FRIEND </s>": 2, "<s> HOW": 1,
+                    "HOW ARE": 1, "ARE YOU": 1, "YOU MY": 1, "MY FRIEND": 1}
+        actual = bigram.get_counts()
+        self.assertEqual(expected, actual)
+
+    def test_trigram(self):
+        trigram = n_gram.Trigram()
+        trigram.add_corpus(self.corpus1)
+        expected = {"<s> HELLO MY": 1, "HELLO MY DEAR": 1, "MY DEAR FRIEND": 1, "DEAR FRIEND </s>": 1}
+        actual = trigram.get_counts()
+        self.assertEqual(expected, actual)
+
     def test_split_corpus_lines(self):
         ngram = n_gram.NGram()
 
