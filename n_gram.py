@@ -54,6 +54,14 @@ class NGram(object):
             for n_gram in self.split_sentence_n_grams(sentence, self.n):
                 yield n_gram
 
+    def discard_unfrequent_n_grams(self, min_counts):
+        n_gram_with_counts = list(self.counts.items())
+        self.counts["<UNK>"] = 0
+        for (n_gram, count) in n_gram_with_counts:
+            if count <= min_counts:
+                self.counts["<UNK>"] += count
+                del self.counts[n_gram]
+
 
 class Unigram(NGram):
     def __init__(self):

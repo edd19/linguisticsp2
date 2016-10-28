@@ -84,4 +84,26 @@ class TestNGram(unittest.TestCase):
 
         self.assertListEqual(expected_top_2, actual_top_2, "Incorrect top 2 elements by counts")
 
+    def test_discard_unfrequent_n_grams(self):
+        unigram = n_gram.Unigram()
+        unigram.add_corpus(self.corpus3)
+
+        unigram.discard_unfrequent_n_grams(1)
+
+        expected = {"THIS": 3, "MY": 2, "<UNK>": 5}
+        actual = unigram.get_counts()
+
+        self.assertDictEqual(expected, actual, "Should discard all n_grams with count less than or equal to 1")
+
+        unigram.flush()
+        unigram.add_corpus(self.corpus3)
+
+        unigram.discard_unfrequent_n_grams(2)
+
+        expected = {"THIS": 3, "<UNK>": 7}
+        actual = unigram.get_counts()
+
+        self.assertDictEqual(expected, actual, "Should discard all n_grams with count less than or equal to 2")
+
+
 
