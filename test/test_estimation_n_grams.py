@@ -4,7 +4,7 @@ import unittest
 import estimation_n_grams
 
 
-class TestNGram(unittest.TestCase):
+class TestMaximumLikelihood(unittest.TestCase):
     def setUp(self):
         self.corpus1 = "<s> HELLO MY DEAR FRIEND </s>"
         self.corpus2 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY FRIEND </s>"

@@ -77,6 +77,7 @@ class NGram(object):
     def get_word_occurences(self):
         return self.word_occurences
 
+
 class Unigram(NGram):
     def __init__(self):
         super(self.__class__, self).__init__(n=1)
