@@ -55,4 +55,4 @@ class MaxLikelihood(object):
         self.n_grams.flush()
         if self.n > 1:
             self.n_minus_1_grams.flush()
-
+        self.cache.clear()
