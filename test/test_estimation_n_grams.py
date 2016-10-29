@@ -79,6 +79,7 @@ class TestLinearInterpolation(unittest.TestCase):
         self.assertEqual(expected, actual, "Should only remove first word")
 
 
+
 class TestMaximumLikelihood(unittest.TestCase):
     def setUp(self):
         self.corpus1 = "<s> HELLO MY DEAR FRIEND </s>"

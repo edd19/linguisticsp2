@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import n_gram
+import math
 
 
 class LinearInterpolation(object):
@@ -10,6 +11,8 @@ class LinearInterpolation(object):
         self.n_grams_array = self.create_n_grams_array()
         self.vocabulary = n_gram.NGram(1)
         self.cache = {}
+        self.m = 0
+        self.perplexity = 1
 
     def create_n_grams_array(self):
         n_grams_array = []
@@ -82,6 +85,39 @@ class LinearInterpolation(object):
             ngram.flush()
         self.cache.clear()
         self.vocabulary.flush()
+
+    def add_test_corpus(self, corpus):
+        for ngram in self.get_n_grams(corpus):
+            probability = self.compute_probability(ngram)
+            self.perplexity *= 1 / probability
+            self.m += 1
+
+    def get_perplexity(self):
+        return math.pow(self.perplexity, 1/self.m)
+
+    def get_n_grams(self, corpus):
+        for sentence in self.split_corpus_sentences(corpus):
+            for ngram in self.split_sentence_n_grams(sentence, self.n):
+                yield ngram
+
+    @staticmethod
+    def split_corpus_sentences(corpus):
+        corpus_left = corpus
+        separator = "</s>"  # Signify end of sentence
+        while len(corpus_left) > 0:
+            sentence, sep, corpus_left = corpus_left.partition(separator)
+            sentence += separator
+            yield sentence.strip()
+
+    @staticmethod
+    def split_sentence_n_grams(sentence, n):
+        words = sentence.split()
+        n_grams = []
+        for word in words:
+            n_grams.append(word)
+            if len(n_grams) >= n:
+                yield " ".join(n_grams)
+                n_grams.pop(0)
 
 
 class MaxLikelihood(LinearInterpolation):
