@@ -1,8 +1,82 @@
 #!/usr/bin/env python3
 
-import unittest
 import estimation_n_grams
 import unittest
+
+
+class TestLinearInterpolation(unittest.TestCase):
+    def setUp(self):
+        self.corpus1 = "<s> HELLO MY DEAR FRIEND </s>"
+        self.corpus2 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY FRIEND </s>"
+        self.corpus3 = "<s> THIS THIS IS MY MY VICTORY THIS NIGHT </s>"
+        self.corpus4 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY DEAR FRIEND MY MY </s>"
+
+    def test_create_n_grams_array(self):
+        linear_interpolation = estimation_n_grams.LinearInterpolation(n=1, k=1)
+
+        actual = [x.n for x in linear_interpolation.n_grams_array]
+        expected = [1]
+
+        self.assertCountEqual(expected, actual, "Should create one n_gram object")
+
+        linear_interpolation = estimation_n_grams.LinearInterpolation(n=3, k=3)
+
+        actual = [x.n for x in linear_interpolation.n_grams_array]
+        expected = [1, 2, 3]
+
+        self.assertCountEqual(expected, actual, "Should create three n_gram objects")
+
+        linear_interpolation = estimation_n_grams.LinearInterpolation(n=5, k=3)
+
+        actual = [x.n for x in linear_interpolation.n_grams_array]
+        expected = [2, 3, 4, 5]
+
+        self.assertCountEqual(expected, actual, "Should create four n_gram objects")
+
+    def test_estimate_unigram(self):
+        linear_interpolation = estimation_n_grams.LinearInterpolation(n=1, k=1)
+
+        linear_interpolation.add_training_corpus(self.corpus1)
+
+        probability = linear_interpolation.estimate_n_gram("HELLO")
+        expected_probability = 1 / 6
+        self.assertEqual(probability, expected_probability, "Don't return good probability")
+
+        probability = linear_interpolation.estimate_n_gram("PRESENT")
+        expected_probability = 0
+        self.assertEqual(probability, expected_probability, "Should return 0 as word is not present")
+
+    def test_estimate_bigram(self):
+        linear_interpolation = estimation_n_grams.LinearInterpolation(n=2, k=2)
+
+        linear_interpolation.add_training_corpus(self.corpus3)
+
+        probability = linear_interpolation.estimate_n_gram("THIS IS")
+        expected_probability = 13 / 60
+        self.assertEqual(probability, expected_probability, "Don't return good probability")
+
+    def test_estimate_trigram(self):
+        linear_interpolation = estimation_n_grams.LinearInterpolation(n=3, k=1)
+
+        linear_interpolation.add_training_corpus(self.corpus1)
+
+        probability = linear_interpolation.estimate_n_gram("HELLO MY DEAR")
+        expected_probability = 1 / 1
+        self.assertEqual(probability, expected_probability, "Don't return good probability")
+
+        linear_interpolation = estimation_n_grams.LinearInterpolation(n=3, k=2)
+        linear_interpolation.add_training_corpus(self.corpus4)
+
+        probability = linear_interpolation.estimate_n_gram("MY DEAR FRIEND")
+        expected_probability = 1
+        self.assertEqual(probability, expected_probability, "Don't return good probability")
+
+    def test_reduce_sentence(self):
+        linear_interpolation = estimation_n_grams.LinearInterpolation(n=1, k=1)
+
+        actual = linear_interpolation.reduce_sentence(self.corpus1)
+        expected = "HELLO MY DEAR FRIEND </s>"
+        self.assertEqual(expected, actual, "Should only remove first word")
 
 
 class TestMaximumLikelihood(unittest.TestCase):

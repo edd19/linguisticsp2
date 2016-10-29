@@ -3,19 +3,26 @@
 import n_gram
 
 
-class MaxLikelihood(object):
-    def __init__(self, n=1):
-        self.n_grams = n_gram.NGram(n)
-        self.n_minus_1_grams = None
-        if n > 1:
-            self.n_minus_1_grams = n_gram.NGram(n-1)
+class LinearInterpolation(object):
+    def __init__(self, n=1, k=1):
         self.n = n
+        self.k = k
+        self.n_grams_array = self.create_n_grams_array()
+        self.vocabulary = n_gram.NGram(1)
         self.cache = {}
 
+    def create_n_grams_array(self):
+        n_grams_array = []
+        for x in range(self.n, self.n-self.k, -1):
+            n_grams_array.append((n_gram.NGram(x)))
+        if self.n > self.k:
+            n_grams_array.append(n_gram.NGram(self.n-self.k))
+        return n_grams_array
+
     def add_training_corpus(self, corpus):
-        self.n_grams.add_corpus(corpus)
-        if self.n > 1:
-            self.n_minus_1_grams.add_corpus(corpus)
+        self.vocabulary.add_corpus(corpus)
+        for ngram in self.n_grams_array:
+            ngram.add_corpus(corpus)
 
     def estimate_n_gram(self, ngram):
         probability = self.cache.get(ngram, None)
@@ -26,23 +33,42 @@ class MaxLikelihood(object):
         return probability
 
     def compute_probability(self, ngram):
-        count_n_gram = self.get_n_gram_count(ngram)
-        count_n_minus_gram = self.get_n_minus_gram_count(ngram)
-        if self.n == 1:
-            return count_n_gram / self.n_grams.get_word_occurences()
-        elif count_n_minus_gram == 0:
+        probability = 0
+        reduced_ngram = ngram
+        for x in range(self.n - 1, self.n-self.k-1, -1):
+            if x <= 0:
+                probability += (1/self.k) * self.compute_probability_of_unigram(reduced_ngram)
+            else:
+                probability += (1/self.k) * self.compute_probability_of_n_gram(reduced_ngram, x+1, x)
+            reduced_ngram = self.reduce_sentence(reduced_ngram)
+        return probability
+
+    @staticmethod
+    def reduce_sentence(sentence):
+        return " ".join(sentence.split()[1:])
+
+    def compute_probability_of_n_gram(self, ngram, n, n_minus):
+        count_n_gram = self.get_n_gram_count(ngram, n)
+        count_n_minus_gram = self.get_n_minus_gram_count(ngram, n_minus)
+        if count_n_minus_gram == 0:
             return 0
         else:
             return count_n_gram / count_n_minus_gram
 
-    def get_n_gram_count(self, ngram):
-        return self.n_grams.get_n_gram_count(ngram)
+    def compute_probability_of_unigram(self, word):
+        count_word = self.get_n_gram_count(word, 1)
+        occurences_words = self.get_occurences_words()
+        return count_word / occurences_words
 
-    def get_n_minus_gram_count(self, ngram):
-        count_n_minus_grams = 0
-        if self.n > 1:
-            n_minus_gram = self.get_minus_n_gram(ngram)
-            count_n_minus_grams = self.n_minus_1_grams.get_n_gram_count(n_minus_gram)
+    def get_occurences_words(self):
+        return self.vocabulary.get_word_occurences()
+
+    def get_n_gram_count(self, ngram, n):
+        return self.n_grams_array[self.n-n].get_n_gram_count(ngram)
+
+    def get_n_minus_gram_count(self, ngram, n_minus):
+        n_minus_gram = self.get_minus_n_gram(ngram)
+        count_n_minus_grams = self.get_n_gram_count(n_minus_gram, n_minus)
         return count_n_minus_grams
 
     @staticmethod
@@ -52,30 +78,28 @@ class MaxLikelihood(object):
         return n_minus_gram
 
     def flush(self):
-        self.n_grams.flush()
-        if self.n > 1:
-            self.n_minus_1_grams.flush()
+        for ngram in self.n_grams_array:
+            ngram.flush()
         self.cache.clear()
+        self.vocabulary.flush()
+
+
+class MaxLikelihood(LinearInterpolation):
+    def __init__(self, n=1):
+        super(MaxLikelihood, self).__init__(n=n, k=1)
 
 
 class LaplaceSmoothing(MaxLikelihood):
-    def __init__(self, n=1):
-        self.vocabulary = n_gram.Unigram()
-        super(self.__class__, self).__init__(n=n)
-
-    def add_training_corpus(self, corpus):
-        self.vocabulary.add_corpus(corpus)
-        super(self.__class__, self).add_training_corpus(corpus)
-
-    def compute_probability(self, ngram):
-        count_n_gram = self.get_n_gram_count(ngram)
-        count_n_minus_gram = self.get_n_minus_gram_count(ngram)
+    def compute_probability_of_n_gram(self, ngram, n, n_minus):
+        count_n_gram = self.get_n_gram_count(ngram, n)
+        count_n_minus_gram = self.get_n_minus_gram_count(ngram, n_minus)
         vocabulary_size = self.vocabulary.get_size()
-        if self.n == 1:
-            return (count_n_gram + 1) / (self.n_grams.get_word_occurences() + vocabulary_size)
-        else:
-            return (count_n_gram + 1) / (count_n_minus_gram + vocabulary_size)
+        return (count_n_gram + 1) / (count_n_minus_gram + vocabulary_size)
 
-    def flush(self):
-        self.vocabulary.flush()
-        super(self.__class__, self).flush()
+    def compute_probability_of_unigram(self, word):
+        count_word = self.get_n_gram_count(word, 1)
+        occurences_words = self.get_occurences_words()
+        vocabulary_size = self.vocabulary.get_size()
+        return (count_word + 1) / (occurences_words + vocabulary_size)
+
+
