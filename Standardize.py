@@ -16,9 +16,9 @@ def process_line(line):
     if line !='\n': #if one line is empty
         yo = yo +'<s> '
 
-    for x in range(0, len(line)-1):
+    for x in range(0, len(line)):
         if line[x] not in ban and line[x] not in endmark: #keep adding characters
-            yo=yo+str(line[x])
+            yo=yo+line[x]
         elif line[x] not in ban and line[x] in endmark: #removes end of sentence and add markers
             yo = yo + ' </s> '
             yo = yo + '<s> '
