@@ -43,9 +43,9 @@ def no_endmark(line):
 
 
 #takes the text as input and returns a standardized text
-def standardize(input):
+def standardize(input, output):
     with open(input, 'r') as f:
-        with open('output.txt', 'w') as f2:
+        with open(output, 'w') as f2:
             for line in f:
                 newline = process_line(line)
                 f2.write(newline)

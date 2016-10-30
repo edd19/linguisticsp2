@@ -71,7 +71,7 @@ class NGram(object):
             if count <= min_counts:
                 self.counts["<UNK>"] += count
                 del self.counts[n_gram]
-                discarded_n_grams.append(n_gram)
+                discarded_n_grams.append(" "+n_gram+" ")
         return discarded_n_grams
 
     def get_word_occurences(self):

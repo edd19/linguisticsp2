@@ -121,10 +121,10 @@ class LinearInterpolation(object):
         self.m += len(corpus.split())
         for ngram in self.get_n_grams(corpus, self.n):
             probability = self.compute_probability(ngram)
-            self.perplexity *= 1 / probability
+            self.perplexity *= math.pow(1 / probability, 1/self.m)
 
     def get_perplexity(self):
-        return math.pow(self.perplexity, 1/self.m)
+        return self.perplexity
 
     def get_n_grams(self, corpus, n):
         for sentence in self.split_corpus_sentences(corpus):
