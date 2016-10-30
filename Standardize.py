@@ -53,4 +53,4 @@ def standardize(input):
 dumas = '/home/ndizera/Documents/MA2/Q1/LINGI2263-Computational_Linguistics/Mission/Dumas/Dumas_train.txt' #ne marche pas à cause de la ligne 14144
 dumas2 = 'Dumas/Dumas_train2.txt' #sans la ligne 14144 ca marche
 test = 'test.txt'
-standardize(dumas)
+#standardize(dumas)
