@@ -8,8 +8,9 @@ endmark = ['.', '!', '?']
 #line as input and returns a line with the corresponding markers and a standardized line
 def process_line(line):
     yo = ''
-    if line !='\n': #if one line is empty
-        yo = yo +'<s> '
+    #if line !='\n': #if one line is empty
+
+    yo = yo +'<s> '
 
     for x in range(0, len(line)):
         if no_endmark(line) and line[x] == '\n':
@@ -23,7 +24,7 @@ def process_line(line):
     if (yo.count('<s>')!=1): #Removes extra starting markers
         yo = replace_right(yo, '<s>', '', 1)
 
-    if (yo.count('</s>')!=1): #Removes extra ending markers
+    if (yo.count('</s>')!=1 and yo.count('</s')>yo.count('<s>')): #Removes extra ending markers
         yo = replace_right(yo, '</s>', '', 1)
 
     yo = yo.upper()
@@ -53,4 +54,5 @@ def standardize(input):
     f.closed
 
 dumas = 'Dumas/Dumas_train.txt'
+test = 'test.txt'
 #standardize(dumas)
