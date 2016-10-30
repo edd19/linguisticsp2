@@ -13,7 +13,7 @@ def process_line(line):
 
     for x in range(0, len(line)):
         if no_endmark(line) and line[x] == '\n':
-            yo = yo + '</s>'
+            yo = yo + ' </s>'
         elif line[x] not in ban and line[x] not in endmark: #keep adding characters
             yo=yo+line[x]
         elif line[x] not in ban and line[x] in endmark: #removes end of sentence and add markers
@@ -46,15 +46,11 @@ def standardize(input):
     with open(input, 'r') as f:
         with open('output.txt', 'w') as f2:
             for line in f:
-                #print(line, end='\n')
                 newline = process_line(line)
-
-                #print(newline, end='\n')
                 f2.write(newline)
                 f2.write('\n')
         f2.closed
     f.closed
 
-dumas = 'Dumas/Dumas_train.txt' #ne marche pas à cause de la ligne 14144
-test = 'test.txt'
+dumas = 'Dumas/Dumas_train.txt'
 #standardize(dumas)
