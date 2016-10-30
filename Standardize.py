@@ -46,15 +46,11 @@ def standardize(input):
     with open(input, 'r') as f:
         with open('output.txt', 'w') as f2:
             for line in f:
-                #print(line, end='\n')
                 newline = process_line(line)
-
-                #print(newline, end='\n')
                 f2.write(newline)
                 f2.write('\n')
         f2.closed
     f.closed
 
-dumas = 'Dumas/Dumas_train.txt' #ne marche pas à cause de la ligne 14144
-test = 'test.txt'
+dumas = 'Dumas/Dumas_train.txt'
 #standardize(dumas)
