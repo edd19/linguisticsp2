@@ -64,11 +64,13 @@ class LinearInterpolation(object):
 
     def compute_e_step(self, n, held_out_corpus):
         sum_e = 0
-        for ngram in self.get_n_grams(held_out_corpus, self.n):
+        for ngram in self.get_n_grams(held_out_corpus, n):
             if n > 1:
-                prob = self.compute_probability_of_n_gram(ngram, n, n-1) / self.estimate_n_gram(ngram)
+                prob = (self.get_lambda(n+1) * self.compute_probability_of_n_gram(ngram, n, n-1))\
+                       / self.estimate_n_gram(ngram)
             else:
-                prob = self.compute_probability_of_unigram(ngram) / self.estimate_n_gram(ngram)
+                prob = (self.get_lambda(n+1) * self.compute_probability_of_unigram(ngram)) \
+                       / self.estimate_n_gram(ngram)
             sum_e += prob
         return sum_e
 

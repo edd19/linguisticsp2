@@ -13,7 +13,7 @@ def process_line(line):
 
     for x in range(0, len(line)):
         if no_endmark(line) and line[x] == '\n':
-            yo = yo + '</s>'
+            yo = yo + ' </s>'
         elif line[x] not in ban and line[x] not in endmark: #keep adding characters
             yo=yo+line[x]
         elif line[x] not in ban and line[x] in endmark: #removes end of sentence and add markers
