@@ -41,7 +41,7 @@ class NGram(object):
 
     @staticmethod
     def split_corpus_sentences(corpus):
-        corpus_left = corpus
+        corpus_left = corpus.strip()
         separator = "</S>"  # Signify end of sentence
         while len(corpus_left) > 0:
             sentence, sep, corpus_left = corpus_left.partition(separator)
