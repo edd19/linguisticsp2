@@ -8,6 +8,8 @@ class LinearInterpolation(object):
     def __init__(self, n=1, k=1):
         self.n = n
         self.k = k
+        self.array_sum_e = []
+        self.array_lambda = []
         self.n_grams_array = self.create_n_grams_array()
         self.vocabulary = n_gram.NGram(1)
         self.cache = {}
@@ -18,6 +20,8 @@ class LinearInterpolation(object):
         n_grams_array = []
         for x in range(self.n, self.n-self.k, -1):
             n_grams_array.append((n_gram.NGram(x)))
+            self.array_sum_e.append(0)
+            self.array_lambda.append(1/self.k)
         if self.n > self.k:
             n_grams_array.append(n_gram.NGram(self.n-self.k))
         return n_grams_array
@@ -40,11 +44,38 @@ class LinearInterpolation(object):
         reduced_ngram = ngram
         for x in range(self.n - 1, self.n-self.k-1, -1):
             if x <= 0:
-                probability += (1/self.k) * self.compute_probability_of_unigram(reduced_ngram)
+                probability += self.get_lambda(x+1) * self.compute_probability_of_unigram(reduced_ngram)
             else:
-                probability += (1/self.k) * self.compute_probability_of_n_gram(reduced_ngram, x+1, x)
+                probability += self.get_lambda(x+1) * self.compute_probability_of_n_gram(reduced_ngram, x+1, x)
             reduced_ngram = self.reduce_sentence(reduced_ngram)
         return probability
+
+    def get_lambda(self, n):
+        return self.array_lambda[self.n-n]
+
+    def add_held_out_corpus(self, held_out_corpus):
+        self.m += len(held_out_corpus.split())
+        for x in range(self.n, self.n - self.k, -1):
+            self.array_sum_e[self.n-x] = self.compute_e_step(x, held_out_corpus)
+
+    def update_lambdas(self):
+        for x in range(0, len(self.array_sum_e)):
+            self.array_lambda[x] = self.array_sum_e[x] / self.m
+
+    def compute_e_step(self, n, held_out_corpus):
+        sum_e = 0
+        for ngram in self.get_n_grams(held_out_corpus, n):
+            if n > 1:
+                prob = (self.get_lambda(n+1) * self.compute_probability_of_n_gram(ngram, n, n-1))\
+                       / self.estimate_n_gram(ngram)
+            else:
+                prob = (self.get_lambda(n+1) * self.compute_probability_of_unigram(ngram)) \
+                       / self.estimate_n_gram(ngram)
+            sum_e += prob
+        return sum_e
+
+    def compute_m_step(self, sum_e):
+        return sum_e / self.m
 
     @staticmethod
     def reduce_sentence(sentence):
@@ -87,23 +118,23 @@ class LinearInterpolation(object):
         self.vocabulary.flush()
 
     def add_test_corpus(self, corpus):
-        for ngram in self.get_n_grams(corpus):
+        self.m += len(corpus.split())
+        for ngram in self.get_n_grams(corpus, self.n):
             probability = self.compute_probability(ngram)
             self.perplexity *= 1 / probability
-            self.m += 1
 
     def get_perplexity(self):
         return math.pow(self.perplexity, 1/self.m)
 
-    def get_n_grams(self, corpus):
+    def get_n_grams(self, corpus, n):
         for sentence in self.split_corpus_sentences(corpus):
-            for ngram in self.split_sentence_n_grams(sentence, self.n):
+            for ngram in self.split_sentence_n_grams(sentence, n):
                 yield ngram
 
     @staticmethod
     def split_corpus_sentences(corpus):
         corpus_left = corpus
-        separator = "</s>"  # Signify end of sentence
+        separator = "</S>"  # Signify end of sentence
         while len(corpus_left) > 0:
             sentence, sep, corpus_left = corpus_left.partition(separator)
             sentence += separator

@@ -6,10 +6,10 @@ import unittest
 
 class TestLinearInterpolation(unittest.TestCase):
     def setUp(self):
-        self.corpus1 = "<s> HELLO MY DEAR FRIEND </s>"
-        self.corpus2 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY FRIEND </s>"
-        self.corpus3 = "<s> THIS THIS IS MY MY VICTORY THIS NIGHT </s>"
-        self.corpus4 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY DEAR FRIEND MY MY </s>"
+        self.corpus1 = "<S> HELLO MY DEAR FRIEND </S>"
+        self.corpus2 = "<S> HELLO MY DEAR FRIEND </S>\n<S> HOW ARE YOU MY FRIEND </S>"
+        self.corpus3 = "<S> THIS THIS IS MY MY VICTORY THIS NIGHT </S>"
+        self.corpus4 = "<S> HELLO MY DEAR FRIEND </S>\n<S> HOW ARE YOU MY DEAR FRIEND MY MY </S>"
 
     def test_create_n_grams_array(self):
         linear_interpolation = estimation_n_grams.LinearInterpolation(n=1, k=1)
@@ -32,6 +32,17 @@ class TestLinearInterpolation(unittest.TestCase):
         expected = [2, 3, 4, 5]
 
         self.assertCountEqual(expected, actual, "Should create four n_gram objects")
+
+    def test_compute_lamdba(self):
+        linear_interpolation = estimation_n_grams.LinearInterpolation(n=1, k=1)
+
+        linear_interpolation.add_training_corpus(self.corpus2)
+
+        linear_interpolation.add_held_out_corpus(self.corpus2)
+
+        linear_interpolation.update_lambdas()
+
+        self.assertEqual(1, linear_interpolation.array_lambda[0], "Only one lambda")
 
     def test_estimate_unigram(self):
         linear_interpolation = estimation_n_grams.LinearInterpolation(n=1, k=1)
@@ -75,17 +86,17 @@ class TestLinearInterpolation(unittest.TestCase):
         linear_interpolation = estimation_n_grams.LinearInterpolation(n=1, k=1)
 
         actual = linear_interpolation.reduce_sentence(self.corpus1)
-        expected = "HELLO MY DEAR FRIEND </s>"
+        expected = "HELLO MY DEAR FRIEND </S>"
         self.assertEqual(expected, actual, "Should only remove first word")
 
 
 
 class TestMaximumLikelihood(unittest.TestCase):
     def setUp(self):
-        self.corpus1 = "<s> HELLO MY DEAR FRIEND </s>"
-        self.corpus2 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY FRIEND </s>"
-        self.corpus3 = "<s> THIS THIS IS MY MY VICTORY THIS NIGHT </s>"
-        self.corpus4 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY DEAR FRIEND MY MY </s>"
+        self.corpus1 = "<S> HELLO MY DEAR FRIEND </S>"
+        self.corpus2 = "<S> HELLO MY DEAR FRIEND </S>\n<S> HOW ARE YOU MY FRIEND </S>"
+        self.corpus3 = "<S> THIS THIS IS MY MY VICTORY THIS NIGHT </S>"
+        self.corpus4 = "<S> HELLO MY DEAR FRIEND </S>\n<S> HOW ARE YOU MY DEAR FRIEND MY MY </S>"
 
     def test_estimate_unigram(self):
         max_likelihood = estimation_n_grams.MaxLikelihood(1)
@@ -150,10 +161,10 @@ class TestMaximumLikelihood(unittest.TestCase):
 
 class TestLaplaceSmoothing(unittest.TestCase):
     def setUp(self):
-        self.corpus1 = "<s> HELLO MY DEAR FRIEND </s>"
-        self.corpus2 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY FRIEND </s>"
-        self.corpus3 = "<s> THIS THIS IS MY MY VICTORY THIS NIGHT </s>"
-        self.corpus4 = "<s> HELLO MY DEAR FRIEND </s>\n<s> HOW ARE YOU MY DEAR FRIEND MY MY </s>"
+        self.corpus1 = "<S> HELLO MY DEAR FRIEND </S>"
+        self.corpus2 = "<S> HELLO MY DEAR FRIEND </S>\n<S> HOW ARE YOU MY FRIEND </S>"
+        self.corpus3 = "<S> THIS THIS IS MY MY VICTORY THIS NIGHT </S>"
+        self.corpus4 = "<S> HELLO MY DEAR FRIEND </S>\n<S> HOW ARE YOU MY DEAR FRIEND MY MY </S>"
 
     def test_estimation_unigram(self):
         laplace = estimation_n_grams.LaplaceSmoothing(1)
